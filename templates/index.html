@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} IA voice projet {% endblock %}</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="Titre">
+
+        </div>
+        <nav class="nav">
+        </nav>
+    </header>
+
+    {% block content %}
+        <div class="container">
+            <h1>Convertir du texte en audio</h1>
+            <form id="textForm">
+                <textarea id="textInput" placeholder="Entrez votre texte ici..."></textarea>
+                <button type="submit">Convertir en audio</button>
+            </form>
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div class="audio-container">
+                <div class="audio-player" id="audio-player" style="display: none;">
+                    <audio id="audioPlayer" controls style="display: none;"></audio>
+                    <button id="play-pause" class="play-btn">▶️</button>
+                    <div class="progress-container">
+                        <div id="progress" class="progress"></div>
+                    </div>
+                    <span id="current-time" class="time">0:00</span> / <span id="duration" class="time">0:00</span>
+                    <a id="download-btn" href="" download class="download-btn">⬇️</a>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            document.getElementById('textForm').addEventListener('submit', async (event) => {
+                event.preventDefault();
+    
+                const text = document.getElementById('textInput').value;
+                if (!text) {
+                    errorMessage.style.display = 'none'; 
+                    return;
+                }
+    
+                try {
+                    const response = await fetch('http://127.0.0.1:8000/text-to-speech/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text: text })
+                    });
+    
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const audioUrl = URL.createObjectURL(blob);
+                        const audioPlayer = document.getElementById('audioPlayer');
+                        audioPlayer.src = audioUrl;
+                        const divAudioPlayer = document.getElementById("audio-player");
+                        const downloadBtn = document.getElementById("download-btn");
+                        divAudioPlayer.style.display = 'flex';
+                        downloadBtn.href = audioUrl;
+                        audioPlayer.play();
+                        const audio = audioPlayer;
+                        const playPauseBtn = document.getElementById("play-pause");
+                        const progressContainer = document.querySelector(".progress-container");
+                        const progress = document.getElementById("progress");
+                        const currentTimeEl = document.getElementById("current-time");
+                        const durationEl = document.getElementById("duration");
+                        const errorMessage = document.getElementById("errorMessage");
+                        errorMessage.style.display = 'none';
+                        
+                        playPauseBtn.addEventListener("click", () => {
+                            if (audio.paused) {
+                                audio.play();
+                                playPauseBtn.textContent = "⏸️";
+                            } else {
+                                audio.pause();
+                                playPauseBtn.textContent = "▶️";
+                            }
+                        });
+
+                        audio.addEventListener("ended", () => {
+                            audio.currentTime = 0;
+                            playPauseBtn.textContent = "▶️";
+                        });
+                        
+                        audio.addEventListener("timeupdate", () => {
+                            const currentTime = audio.currentTime;
+                            const duration = audio.duration;
+                        
+                            const progressPercent = (currentTime / duration) * 100;
+                            progress.style.width = `${progressPercent}%`;
+                        
+                            currentTimeEl.textContent = formatTime(currentTime);
+                            durationEl.textContent = formatTime(duration);
+                        });
+                        
+                        progressContainer.addEventListener("click", (e) => {
+                            const width = progressContainer.clientWidth;
+                            const clickX = e.offsetX;
+                            const duration = audio.duration;
+                        
+                            audio.currentTime = (clickX / width) * duration;
+                        });
+                        
+                        function formatTime(seconds) {
+                            const minutes = Math.floor(seconds / 60);
+                            const secs = Math.floor(seconds % 60);
+                            return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+                        }
+                        
+                    } else {
+                        errorMessage.textContent = "Erreur lors de la conversion. Veuillez réessayer.";
+                        errorMessage.style.display = 'block';                    }
+                } catch (error) {
+                    console.error("Erreur :", error);
+                    errorMessage.textContent = "Une erreur est survenue. Vérifiez que l'API est bien en marche.";
+                    errorMessage.style.display = 'block';
+                }
+            });
+        </script>
+
+    {% endblock %}
+</body>
+</html>
