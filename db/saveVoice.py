@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine,text
-engine =create_engine("mysql+mysqlconnector://root:@localhost:3306/sql", echo=True)
+engine = create_engine("mysql+mysqlconnector://root:@host.docker.internal:3306/sql", echo=True)
 conn = engine.connect()
 req1 = conn.execute(text(f"CREATE TABLE IF NOT EXISTS voice_ai (id INT AUTO_INCREMENT PRIMARY KEY, text VARCHAR(255) NOT NULL, filename VARCHAR(255) NOT NULL)")) 
 
