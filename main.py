@@ -6,15 +6,17 @@ import uuid
 from db import saveVoice
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5000"],  # Remplace par l'origine du front-end
+    allow_origins=[os.getenv("FRONTEND_ORIGIN")]
     allow_credentials=True,
-    allow_methods=["*"],  # Autoriser tous les types de requêtes (GET, POST, etc.)
-    allow_headers=["*"],  # Autoriser tous les en-têtes
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 class TextRequest(BaseModel):
