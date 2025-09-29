@@ -1,4 +1,6 @@
-# IA-exte_to_Voice
+# IA-Texte_to_Voice
+
+Need .env variables : FRONTEND_ORIGIN, URL_DB_CONNECTION
 
 
 <img width="996" alt="Capture d’écran 2025-01-14 à 16 44 38" src="https://github.com/user-attachments/assets/b5d85506-b2a2-4f79-8419-38071f9ee0ad" />
